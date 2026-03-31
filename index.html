@@ -1,84 +1,19 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<title>オキタラクエスト</title>
 
-<!-- ✅ 追加（ここがhead） -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f0f0f">
-
-<style>
-body {
-  margin: 0;
-  font-family: sans-serif;
-  background: #0f0f0f;
-  color: white;
-  text-align: center;
+  font-size: 60px;
+  margin-top: 30px;
 }
 
-.screen {
-  display: none;
-  padding: 40px;
-}
-
-.active {
-  display: block;
-}
-
-h1 {
-  font-size: 32px;
-  margin-bottom: 20px;
-}
-
-button {
-  padding: 15px 25px;
-  font-size: 18px;
+#status {
   margin-top: 20px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-button:active {
-  transform: scale(0.95);
-}
-
-.start { background: gold; color: black; }
-.phase1 { background: #2ecc71; }
-.phase2 { background: #f1c40f; color: black; }
-.phase3 { background: #e74c3c; }
-
-.box {
-  margin: 20px auto;
-  padding: 20px;
-  width: 80%;
-  border-radius: 10px;
-  background: #1e1e1e;
-}
-
-input {
-  padding: 10px;
-  width: 70%;
-  font-size: 16px;
-  border-radius: 8px;
-  border: none;
-}
-
-.fade {
-  animation: fade 0.5s;
-}
-
-@keyframes fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  font-size: 18px;
 }
 </style>
 
 </head>
 <body>
-
+<button onclick="startCountdown()">スタート</button>
+<div id="timer">10</div>
+<div id="status"></div>
 <!-- 🏠 ホーム -->
 <div id="home" class="screen active">
   <h1>🎮 オキタラクエスト</h1>
@@ -213,7 +148,43 @@ function reset() {
   show("home");
 }
 
-/* ✅ 追加（ここがscriptの一番下） */
+/* 🔥 ここからタイマー */
+let countdown = 10;
+let timerInterval;
+
+function startCountdown() {
+  countdown = 10;
+  document.getElementById("status").innerText = "準備しろ...";
+  document.getElementById("timer").innerText = countdown;
+
+  timerInterval = setInterval(() => {
+    countdown--;
+    document.getElementById("timer").innerText = countdown;
+
+    if (countdown <= 0) {
+      clearInterval(timerInterval);
+      startTask();
+    }
+  }, 1000);
+}
+
+function startTask() {
+  document.getElementById("status").innerText = "🔥 今すぐやれ 🔥";
+  document.body.style.background = "#1a0000";
+
+  let count = localStorage.getItem("count") || 0;
+  count++;
+  localStorage.setItem("count", count);
+
+  document.getElementById("status").innerText += "（今日 " + count + "回目）";
+
+  // 👇 ここ追加
+  document.getElementById("task1").innerText =
+    tasks1[Math.floor(Math.random() * tasks1.length)];
+
+  show("phase1");
+}
+/* PWA */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
 }
