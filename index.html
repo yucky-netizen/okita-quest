@@ -17,105 +17,50 @@ body{
   height:100vh;
 }
 
-.screen{
-  display:none;
-  width:100%;
-  max-width:420px;
-  padding:20px;
-  text-align:center;
-}
+.screen{display:none; max-width:420px; width:100%; padding:20px; text-align:center;}
 .active{display:block;}
 
-.box{
-  background:rgba(255,255,255,0.1);
-  padding:20px;
-  border-radius:15px;
-  margin:15px 0;
-}
+.box{background:rgba(255,255,255,0.1); padding:20px; border-radius:15px; margin:15px 0;}
 
-button{
-  width:100%;
-  padding:15px;
-  margin-top:10px;
-  border:none;
-  border-radius:10px;
-  font-size:16px;
-}
+button{width:100%; padding:15px; margin-top:10px; border:none; border-radius:10px;}
 
-.start{background:gold;color:black;}
+.start{background:gold;}
 .phase1{background:#00cc66;}
-.phase2{background:#ffcc00;color:black;}
+.phase2{background:#ffcc00;}
 .phase3{background:#cc0000;}
 
-#timer{font-size:50px;}
+.timer{font-size:50px;}
 
-.bar{
-  height:10px;
-  background:#333;
-  border-radius:5px;
-  overflow:hidden;
-}
-.fill{
-  height:100%;
-  background:gold;
-  width:0%;
-}
+.bar{height:10px; background:#333; border-radius:5px;}
+.fill{height:100%; background:gold; width:0%;}
 
-/* フラッシュ演出 */
-.flash{
-  animation:flash 0.4s;
-}
-@keyframes flash{
-  0%{background:white;}
-  100%{background:none;}
-}
+.flash{animation:flash 0.3s;}
+@keyframes flash{0%{background:white;}100%{background:none;}}
 </style>
 </head>
 
 <body>
 
+<!-- ホーム -->
 <div id="home" class="screen active">
 <h1>🎮 オキタラクエスト</h1>
 
 <div class="box">
-Lv.<span id="level">1</span><br>
+Lv.<span id="level">1</span>
 <div class="bar"><div id="xp" class="fill"></div></div>
-
-🔥<span id="streak">0</span>日継続<br>
 📊<span id="total">0</span>回達成
 </div>
 
 <button class="start" onclick="start()">▶ 始める</button>
-<button onclick="showLog()">📜 今日の記録</button>
+<button onclick="show('log')">📜 記録</button>
 </div>
 
-<!-- フェーズ1 -->
-<div id="phase1" class="screen">
-<h2>起動</h2>
-<div id="timer">10</div>
-<div class="box" id="task1"></div>
-<button class="phase1" onclick="runPhase(1)">実行</button>
-</div>
-
-<!-- フェーズ2 -->
-<div id="phase2" class="screen">
-<h2>加速</h2>
-<div id="timer2">5</div>
-<div class="box" id="task2"></div>
-<button class="phase2" onclick="runPhase(2)">実行</button>
-</div>
-
-<!-- フェーズ3 -->
-<div id="phase3" class="screen">
-<h2>自由タスク</h2>
-
-<input id="customTask" placeholder="やること">
-<button onclick="saveCustom()">保存</button>
-
-<div id="savedTasks"></div>
-
-<div id="timer3">5</div>
-<button class="phase3" onclick="runPhase(3)">開始</button>
+<!-- フェーズ -->
+<div id="phase" class="screen">
+<h2 id="phaseTitle"></h2>
+<div class="timer" id="timer">5</div>
+<div class="box" id="task"></div>
+<button onclick="startTask()">実行</button>
 </div>
 
 <!-- 完了 -->
@@ -126,7 +71,7 @@ Lv.<span id="level">1</span><br>
 
 <!-- ログ -->
 <div id="log" class="screen">
-<h2>今日の記録</h2>
+<h2>記録</h2>
 <div id="todayLog"></div>
 <button onclick="show('home')">戻る</button>
 </div>
@@ -135,7 +80,10 @@ Lv.<span id="level">1</span><br>
 let level=+localStorage.getItem("level")||1;
 let xp=+localStorage.getItem("xp")||0;
 
-/* 画面切替 */
+let phase=1;
+let interval=null;
+
+/* 画面 */
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -143,116 +91,81 @@ function show(id){
 
 /* スタート */
 function start(){
-  show("phase1");
-  countdownStart();
+  phase=1;
+  nextPhase();
 }
 
-/* 初期タイマー */
-function countdownStart(){
-  let t=10;
-  timer.innerText=t;
+/* フェーズ進行 */
+function nextPhase(){
+  clearInterval(interval);
 
-  let i=setInterval(()=>{
-    t--;
-    timer.innerText=t;
-    if(t<=0){
-      clearInterval(i);
-      task1.innerText=randomTask(["水飲む","立つ","深呼吸"]);
-    }
-  },1000);
+  show("phase");
+
+  let title=["起動","加速","自由"][phase-1];
+  document.getElementById("phaseTitle").innerText=title;
+
+  let tasks=[
+    ["水飲む","立つ","深呼吸"],
+    ["掃除","片付け","洗う"],
+    JSON.parse(localStorage.getItem("tasks")||"[]")
+  ];
+
+  let taskList = tasks[phase-1];
+  let taskText = taskList.length ? taskList[Math.floor(Math.random()*taskList.length)] : "自由にやる";
+
+  document.getElementById("task").innerText=taskText;
+  document.getElementById("timer").innerText=5;
 }
 
-/* フェーズ実行 */
-function runPhase(p){
+/* 実行 */
+function startTask(){
   let t=5;
-  let timerEl = document.getElementById("timer"+(p===1?"":p));
-  if(p===1) timerEl = timer;
+  let timerEl=document.getElementById("timer");
 
-  let i=setInterval(()=>{
+  clearInterval(interval);
+
+  interval=setInterval(()=>{
     t--;
     timerEl.innerText=t;
+
     if(t<=0){
-      clearInterval(i);
-      nextPhase(p);
+      clearInterval(interval);
+      completePhase();
     }
   },1000);
 }
 
-/* 次へ */
-function nextPhase(p){
+/* フェーズ完了 */
+function completePhase(){
   document.body.classList.add("flash");
-  setTimeout(()=>document.body.classList.remove("flash"),300);
+  setTimeout(()=>document.body.classList.remove("flash"),200);
 
-  if(p==1){
-    task2.innerText=randomTask(["掃除","片付け","洗う"]);
-    show("phase2");
-  }
-  else if(p==2){
-    show("phase3");
-    loadCustom();
-  }
-  else{
-    complete();
+  if(phase<3){
+    phase++;
+    nextPhase();
+  }else{
+    finish();
   }
 }
 
-/* 完了 */
-function complete(){
+/* 完全達成 */
+function finish(){
   xp+=20;
+
   if(xp>=100){
     xp=0;
     level++;
-    msg.innerText="レベルアップ！";
+    document.getElementById("msg").innerText="レベルアップ！";
   }
 
-  saveData();
-  saveLog();
+  localStorage.setItem("level",level);
+  localStorage.setItem("xp",xp);
+  localStorage.setItem("total",(+localStorage.getItem("total")||0)+1);
+
   show("complete");
 }
 
-/* 保存 */
-function saveData(){
-  localStorage.setItem("level",level);
-  localStorage.setItem("xp",xp);
-}
-
-/* カスタム */
-function saveCustom(){
-  let task=customTask.value;
-  let list=JSON.parse(localStorage.getItem("tasks")||"[]");
-  list.push(task);
-  localStorage.setItem("tasks",JSON.stringify(list));
-  loadCustom();
-}
-
-function loadCustom(){
-  let list=JSON.parse(localStorage.getItem("tasks")||"[]");
-  savedTasks.innerHTML=list.map(t=>`<div>${t}</div>`).join("");
-}
-
-/* ログ */
-function saveLog(){
-  let today=new Date().toDateString();
-  let logs=JSON.parse(localStorage.getItem("logs")||"{}");
-
-  if(!logs[today]) logs[today]=[];
-  logs[today].push("達成");
-
-  localStorage.setItem("logs",JSON.stringify(logs));
-
-  localStorage.setItem("total",
-    (+localStorage.getItem("total")||0)+1
-  );
-}
-
-function showLog(){
-  let today=new Date().toDateString();
-  let logs=JSON.parse(localStorage.getItem("logs")||"{}");
-  todayLog.innerHTML=(logs[today]||[]).join("<br>");
-  show("log");
-}
-
-/* リセット */
+/* 戻る */
 function reset(){
   show("home");
   updateUI();
@@ -265,12 +178,8 @@ function updateUI(){
   document.getElementById("total").innerText=localStorage.getItem("total")||0;
 }
 
+/* 初期 */
 window.onload=updateUI;
-
-/* util */
-function randomTask(arr){
-  return arr[Math.random()*arr.length|0];
-}
 </script>
 
 </body>
