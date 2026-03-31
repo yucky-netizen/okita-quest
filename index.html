@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <title>オキタラクエスト</title>
 
+<!-- ✅ 追加（ここがhead） -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f0f0f">
+
 <style>
 body {
   margin: 0;
@@ -113,7 +117,7 @@ input {
 <!-- 🔴 フェーズ3 -->
 <div id="phase3" class="screen">
   <h1>🔴 選択</h1>
-  <p>「ここからが本番」</p>
+  <p>「これをやれば今日は勝ち」</p>
 
   <input id="customTask" placeholder="やることを書く">
 
@@ -193,6 +197,8 @@ function complete() {
   document.getElementById("gain").innerText = gain;
   document.getElementById("newGauge").innerText = gauge;
 
+  alert("覚醒レベル上昇 + " + gain + "pt");
+
   show("complete");
 }
 
@@ -205,6 +211,11 @@ function reset() {
   document.getElementById("customTask").value = "";
 
   show("home");
+}
+
+/* ✅ 追加（ここがscriptの一番下） */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
 }
 </script>
 
