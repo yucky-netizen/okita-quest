@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>オキタラクエスト</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #0f0f0f;
+  color: white;
+  text-align: center;
+}
+
+.screen {
+  display: none;
+  padding: 40px;
+}
+
+.active {
+  display: block;
+}
+
+h1 {
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+button {
+  padding: 15px 25px;
+  font-size: 18px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+.start { background: gold; color: black; }
+.phase1 { background: #2ecc71; }
+.phase2 { background: #f1c40f; color: black; }
+.phase3 { background: #e74c3c; }
+
+.box {
+  margin: 20px auto;
+  padding: 20px;
+  width: 80%;
+  border-radius: 10px;
+  background: #1e1e1e;
+}
+
+input {
+  padding: 10px;
+  width: 70%;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+}
+
+.fade {
+  animation: fade 0.5s;
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+</style>
+
+</head>
+<body>
+
+<!-- 🏠 ホーム -->
+<div id="home" class="screen active">
+  <h1>🎮 オキタラクエスト</h1>
+
+  <div class="box">
+    🔥 覚醒ゲージ：<span id="gauge">0</span>%<br><br>
+    📈 成長ポイント：<span id="points">0</span>pt<br><br>
+
+    💭 未来ログ：
+    <div id="message">「まだ間に合う」</div>
+  </div>
+
+  <button class="start" onclick="start()">▶ 今すぐ始める</button>
+</div>
+
+<!-- 🟢 フェーズ1 -->
+<div id="phase1" class="screen">
+  <h1>🟢 起動</h1>
+  <p>「1分でいい。とりあえず動け」</p>
+
+  <div class="box" id="task1"></div>
+
+  <button class="phase1" onclick="next(2)">実行する</button>
+</div>
+
+<!-- 🟡 フェーズ2 -->
+<div id="phase2" class="screen">
+  <h1>🟡 加速</h1>
+  <p>「ここで差がつく」</p>
+
+  <div class="box" id="task2"></div>
+
+  <button class="phase2" onclick="next(3)">実行する</button>
+</div>
+
+<!-- 🔴 フェーズ3 -->
+<div id="phase3" class="screen">
+  <h1>🔴 選択</h1>
+  <p>「ここからが本番」</p>
+
+  <input id="customTask" placeholder="やることを書く">
+
+  <br>
+  <button class="phase3" onclick="complete()">開始する</button>
+</div>
+
+<!-- 🎉 完了 -->
+<div id="complete" class="screen">
+  <h1>🎉 クエスト達成！</h1>
+
+  <div class="box">
+    +<span id="gain">0</span>pt 獲得！<br><br>
+    🔥 覚醒：<span id="newGauge"></span>%<br><br>
+    「さっきの自分より前進してる」
+  </div>
+
+  <button onclick="reset()">▶ 次のクエスト</button>
+</div>
+
+<script>
+let points = 0;
+let gauge = 0;
+
+const tasks1 = [
+  "水を飲む",
+  "立ち上がる",
+  "肩を回す",
+  "窓を開ける",
+  "深呼吸する"
+];
+
+const tasks2 = [
+  "皿を洗う",
+  "洗濯を回す",
+  "机を整える",
+  "ゴミをまとめる",
+  "3分だけ掃除"
+];
+
+const messages = [
+  "まだ間に合う",
+  "今動けば変わる",
+  "未来の自分が待ってる",
+  "ここでやるか、終わるか",
+  "昨日と同じでいいのか？"
+];
+
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  const el = document.getElementById(id);
+  el.classList.add("active");
+  el.classList.add("fade");
+}
+
+function start() {
+  document.getElementById("task1").innerText =
+    tasks1[Math.floor(Math.random() * tasks1.length)];
+  show("phase1");
+}
+
+function next(phase) {
+  if (phase === 2) {
+    document.getElementById("task2").innerText =
+      tasks2[Math.floor(Math.random() * tasks2.length)];
+    show("phase2");
+  } else if (phase === 3) {
+    show("phase3");
+  }
+}
+
+function complete() {
+  let gain = Math.floor(Math.random() * 20) + 30;
+  points += gain;
+  gauge += Math.floor(Math.random() * 10) + 5;
+
+  document.getElementById("gain").innerText = gain;
+  document.getElementById("newGauge").innerText = gauge;
+
+  show("complete");
+}
+
+function reset() {
+  document.getElementById("points").innerText = points;
+  document.getElementById("gauge").innerText = gauge;
+  document.getElementById("message").innerText =
+    messages[Math.floor(Math.random() * messages.length)];
+
+  document.getElementById("customTask").value = "";
+
+  show("home");
+}
+</script>
+
+</body>
+</html>
