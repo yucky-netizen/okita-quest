@@ -1,19 +1,94 @@
-
-  font-size: 60px;
-  margin-top: 30px;
+<style>
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
+  color: white;
+  text-align: center;
 }
 
-#status {
-  margin-top: 20px;
+.screen {
+  display: none;
+  padding: 30px 20px;
+}
+
+.active {
+  display: block;
+}
+
+h1 {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.box {
+  margin: 20px auto;
+  padding: 20px;
+  width: 90%;
+  max-width: 350px;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+button {
+  width: 90%;
+  max-width: 300px;
+  padding: 18px;
   font-size: 18px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+.start {
+  background: linear-gradient(45deg, gold, orange);
+  color: black;
+  font-weight: bold;
+}
+
+.phase1 {
+  background: linear-gradient(45deg, #00ff88, #00cc66);
+}
+
+.phase2 {
+  background: linear-gradient(45deg, #ffe600, #ffcc00);
+  color: black;
+}
+
+.phase3 {
+  background: linear-gradient(45deg, #ff4d4d, #cc0000);
+}
+
+input {
+  padding: 15px;
+  width: 85%;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  margin-top: 20px;
+}
+
+.fade {
+  animation: fade 0.4s;
+}
+
+@keyframes fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
 
 </head>
 <body>
-<button onclick="startCountdown()">スタート</button>
-<div id="timer">10</div>
-<div id="status"></div>
+
 <!-- 🏠 ホーム -->
 <div id="home" class="screen active">
   <h1>🎮 オキタラクエスト</h1>
@@ -33,11 +108,15 @@
 <div id="phase1" class="screen">
   <h1>🟢 起動</h1>
   <p>「1分でいい。とりあえず動け」</p>
-
+  
+  <div id="timer">10</div>
+  <div id="status"></div>
+  
   <div class="box" id="task1"></div>
 
   <button class="phase1" onclick="next(2)">実行する</button>
 </div>
+  
 
 <!-- 🟡 フェーズ2 -->
 <div id="phase2" class="screen">
@@ -109,9 +188,7 @@ function show(id) {
 }
 
 function start() {
-  document.getElementById("task1").innerText =
-    tasks1[Math.floor(Math.random() * tasks1.length)];
-  show("phase1");
+  startCountdown();
 }
 
 function next(phase) {
